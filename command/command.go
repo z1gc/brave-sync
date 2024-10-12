@@ -67,6 +67,12 @@ func handleGetUpdatesRequest(cache *cache.Cache, guMsg *sync_pb.GetUpdatesMessag
 			}
 		}
 
+		// Reject if we don't allow new registration of sync account:
+		if activeDevices == 0 && !cache.AllowNewReg {
+			errCode = sync_pb.SyncEnums_DISABLED_BY_ADMIN
+			return &errCode, fmt.Errorf("registration is not allowed")
+		}
+
 		// Insert initial records if needed.
 		err := InsertServerDefinedUniqueEntities(db, clientID)
 		if err != nil {

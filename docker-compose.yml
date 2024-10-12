@@ -19,10 +19,7 @@ services:
     networks:
       - sync
     environment:
-      - PPROF_ENABLED=true
-      - SENTRY_DSN
       - ENV=local
-      - DEBUG=1
       - AWS_ACCESS_KEY_ID=GOSYNC
       - AWS_SECRET_ACCESS_KEY=GOSYNC
       - AWS_REGION=us-west-2
@@ -36,6 +33,7 @@ services:
         VERSION: "${VERSION}"
         COMMIT: "${COMMIT}"
         BUILD_TIME: "${BUILD_TIME}"
+    image: brave-sync
     ports:
       - "8295:8295"
     depends_on:
@@ -44,10 +42,8 @@ services:
     networks:
       - sync
     environment:
-      - PPROF_ENABLED=true
-      - SENTRY_DSN
+      - ALLOW_NEW_REG=1
       - ENV=local
-      - DEBUG=1
       - AWS_ACCESS_KEY_ID=GOSYNC
       - AWS_SECRET_ACCESS_KEY=GOSYNC
       - AWS_REGION=us-west-2
@@ -58,15 +54,20 @@ services:
     build:
       context: .
       dockerfile: dynamo.Dockerfile
+    image: brave-dynamo
     ports:
       - "8000:8000"
+    # volumes:
+    #   - /db
     networks:
       - sync
   redis:
-    image: public.ecr.aws/docker/library/redis:6.2
+    image: redis:6.2
     ports:
       - "6379:6379"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
+    # volumes:
+    #   - /data
     networks:
       - sync

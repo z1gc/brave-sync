@@ -9,6 +9,57 @@ This server supports endpoints as bellow.
 
 Currently we use dynamoDB as the datastore, the schema could be found in `schema/dynamodb/table.json`.
 
+# Hack
+
+1. Run `make docker` to build two images, `brave-sync` and `brave-dynamo`
+2. Run `make PUSH=docker.io/... push` to push the images to some docker registries
+
+The example `docker-compose.yml` could be:
+
+```yaml
+services:
+  brave-sync:
+    image: brave-sync:latest
+    user: 1000:1000
+    ports:
+      - 127.0.0.1:8295:8295
+    depends_on:
+      - brave-dynamo
+      - redis
+    environment:
+      # After devices setup, you can remove the `ALLOW_NEW_REG` to keep some badass out:
+      - ALLOW_NEW_REG=1
+      - ENV=local
+      - AWS_ACCESS_KEY_ID=GOSYNC
+      - AWS_SECRET_ACCESS_KEY=GOSYNC
+      - AWS_REGION=us-west-2
+      - AWS_ENDPOINT=http://brave-dynamo:8000
+      - TABLE_NAME=client-entity-dev
+      - REDIS_URL=redis:6379
+    restart: unless-stopped
+
+  brave-dynamo:
+    image: brave-dynamo:latest
+    user: 1000:1000
+    volumes:
+      - /where/to/store/the/data:/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:6.2
+    user: 1000:1000
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - /where/to/store/the/redis:/data
+    restart: unless-stopped
+```
+
+For most up-to-date compose file, please visit the [`docker-compose.yml`](https://github.com/z1gc/brave-sync/blob/master/docker-compose.yml) :)
+
+* A environment `ALLOW_NEW_REG` is added, a new client (which have no devices connected) is only allowed if it's set to `1`
+* You can push the images, due to some network restrictions, I'm not going to publish them via docker.io
+
 ## Developer Setup
 1. [Install Go 1.22](https://golang.org/doc/install)
 2. [Install GolangCI-Lint](https://github.com/golangci/golangci-lint#install)
