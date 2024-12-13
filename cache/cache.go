@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"os"
 	"strconv"
 	"time"
 
@@ -15,11 +16,12 @@ var (
 // Cache is a wrapper for cache accesses.
 type Cache struct {
 	RedisClient // interface for accessing underlying redis client
+	AllowNewReg bool
 }
 
 // NewCache creates a Cache wrapper with underlying redis client assigned.
 func NewCache(r RedisClient) *Cache {
-	return &Cache{r}
+	return &Cache{r, os.Getenv("ALLOW_NEW_REG") == "1"}
 }
 
 // GetTypeMtimeKey returns derived cache key clientID#dataType

@@ -1,6 +1,7 @@
 GIT_VERSION := $(shell git describe --abbrev=8 --dirty --always --tags)
 GIT_COMMIT := $(shell git rev-parse --short HEAD)
 BUILD_TIME := $(shell date +%s)
+PUSH ?= ""
 
 .PHONY: all build test lint clean
 
@@ -30,6 +31,14 @@ clean:
 
 docker:
 	COMMIT=$(GIT_COMMIT) VERSION=$(GIT_VERSION) BUILD_TIME=$(BUILD_TIME) docker compose build
+
+# make PUSH=docker.io/... push
+push:
+	docker tag brave-sync ${PUSH}/brave-sync:latest
+	docker tag brave-dynamo ${PUSH}/brave-dynamo:latest
+
+	docker push ${PUSH}/brave-sync:latest
+	docker push ${PUSH}/brave-dynamo:latest
 
 docker-up:
 	COMMIT=$(GIT_COMMIT) VERSION=$(GIT_VERSION) BUILD_TIME=$(BUILD_TIME) docker compose up

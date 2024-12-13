@@ -27,6 +27,9 @@ RUN mkdir -p ${DB_LOCATION} && \
 FROM amazon/dynamodb-local:2.5.3
 
 ARG DB_LOCATION
-COPY --chown=dynamodblocal:dynamodblocal --from=install ${DB_LOCATION} /db
+RUN mkdir -p ${DB_LOCATION}
+COPY --chmod=777 dynamo.startup /usr/bin/
+COPY --chown=dynamodblocal:dynamodblocal --from=install ${DB_LOCATION}/* ${DB_LOCATION}/
 
+ENTRYPOINT ["dynamo.startup"]
 CMD ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "/db"]

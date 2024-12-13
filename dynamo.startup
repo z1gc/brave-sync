@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -xeu
+
+DB=shared-local-instance.db
+FROM="/home/dynamodblocal/db/$DB"
+TO="/db/$DB"
+
+if [[ ! -e "$TO" ]]; then
+	cp -v "$FROM" "$TO"
+fi
+
+# Entrypoint of `docker inspect amazon/dynamo-local:2.5.2`:
+exec java "$@"
